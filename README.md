@@ -1,1 +1,404 @@
-# sungrowpower_competition
+# 阳光电源竞赛测试与软件资料
+
+本仓库集中提供测试手册、上位机、下位机源码与固件、波形处理软件、烧录程序及 CAN 驱动。
+
+> [!CAUTION]
+> 本项目涉及高压、大电流和功率半导体短路测试。上电前必须确认放电、联锁、探头量程、接地与人员防护；短路单脉冲必须人工逐次触发。
+
+## 发布包下载
+
+| 分类 | 版本 | 内容 | 下载 |
+| --- | --- | --- | --- |
+| 上位机 | v1.2.5（CAN/JTAG） | CAN 通信、手动测试控制与 JTAG 版本配套上位机 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/上位机-v1.2.5/Host_UI_v1.2.5_CAN_20260730.zip) |
+| 下位机 | v1.2.5（CAN/J-Link） | 固件、源码、烧录文件与配套说明 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/下位机-v1.2.5/Firmware_v1.2.5_CAN-JLink_Source_20260730.zip) |
+| 处理软件 | v1.2.5 | 双脉冲/开关能量波形处理软件 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/处理软件-v1.2.5/Processing_Software_v1.2.5_20260730.zip) |
+| 上位机（串口） | v1.2.5 Beta | 串口通信测试版上位机 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/上位机-串口-v1.2.5-beta/Host_UI_Serial_v1.2.5-beta_20260730.zip) |
+| 下位机（串口） | v1.2.5 Beta | 串口/YMODEM 相关固件及源码测试版 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/下位机-串口-v1.2.5-beta/Firmware_Serial_YModem_v1.2.5-beta_Source_20260730.zip) |
+| 烧录程序 | NSSine Prog V1.26 | NSSine 烧录程序与运行库 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/烧录程序-v1.26/NSSine_Prog_V1.26.zip) |
+| CAN 驱动 | 2026-07-30 | USB-CAN 驱动安装工具、安装说明和手动安装包 | [下载](https://github.com/XIsStillLearing/sungrowpower_competition/releases/download/CAN驱动-20260730/CAN_Driver_20260730.zip) |
+
+串口版本为 Beta，建议先在低压、无功率输出条件下完成通信和烧录链路验证。所有历史版本与说明可在 [Releases 页面](https://github.com/XIsStillLearing/sungrowpower_competition/releases) 查看。
+
+## 测试手册
+
+### 手册说明与注意事项
+
+#### 测试注意事项
+
+1.  MOSFET 安装和焊接时为罗氏线圈及差分探头留出测量空间，提供手册建议预留约 0.7 cm；不得为方便测量而改变主功率回路寄生参数。
+
+2.  所有栅极电压均以 Kelvin Source 为参考；高压上电前确认放电、联锁、探头量程和共模范围。
+
+3.  每条数据必须保存实际探头型号、传播延迟、示波器 deskew、带宽限制和通道映射。已经在示波器内补偿的数据，软件 deskew 保持 0 ns。
+
+4. 评估软件仓库：[XIsStillLearing/double-pulse-switching-energy](https://github.com/XIsStillLearing/double-pulse-switching-energy)（Tektronix ISF 双脉冲波形重构与 Eon/Eoff 分析）
+
+5. 程序烧录：使用 ARM 烧录器连接控制板，接线如下图。
+
+![image1](docs/assets/test-manual/image1.jpeg)
+![image2](docs/assets/test-manual/image2.png)
+
+- 烧码器连接：
+
+- JLINK上面四根杜邦线：SWDIO，SWCLK,VCC,GND
+
+- 分别连接Mini Board如下：
+
+- VCC->VDDIO(JP3:pin 1,2,3,4皆可)
+
+- GND->VSS(JP4:pin1,2,3,4皆可)
+
+- SWDIO-> SWDIO (JP3:pin5,6皆可)
+
+- SWCLK-> SWCLK (JP3:pin7,8皆可)
+
+- MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接即可
+
+- 注意:
+
+- (1)如果把JLINK上的VCC连接至板上的VDDIO,则板上USB线可不用连接,
+
+- 如果连接了板上的USB线供电,则最好不要连接JLINK上的VCC到板子上
+
+- (2)串口线必须连走USB线连接至板子上
+
+- Keil配置
+
+(1)J-LINK Driver需要安装至电脑上,一般WINDOWS会自动安装有,可以在设备管理器确认下
+
+(2)在打开工程后,点击”Option”->”Debug”选择”JLINK/JTRACE”如下图
+
+![image3](docs/assets/test-manual/image3.png)
+
+(3)如果此时已连接JLINK,可以进右侧Setting,进入如果正确识别出JLINK ID号,则调试器识别成功,就可以按照KEIL正常烧码和仿真流程操作了,如下图:
+
+![image4](docs/assets/test-manual/image4.png)
+
+6. 通信设置：比赛中使用治具底部连接测试板，各组可自行飞线，将 CAN 盒连接至电脑进行通信。
+
+需要提前安装 CAN 驱动，否则电脑无法识别 CAN 设备，上位机不能正常运行。
+
+![image5](docs/assets/test-manual/image5.png)
+
+![image6](docs/assets/test-manual/image6.jpeg)
+
+7. 上位机使用：
+
+1.确保接线正常之后打开上位机，界面如图：
+
+![image7](docs/assets/test-manual/image7.png)
+
+2.点击connect：
+
+![2.点击connect：](docs/assets/test-manual/image8.png)
+
+3.连接正常时，右上角can从离线变为空闲，右下角可以操作，界面：
+
+![3.连接正常时，右上角can从离线变为空闲，右下角可以操作，界面：](docs/assets/test-manual/image9.png)
+
+4.点击start下位机开始执行：
+
+![image10](docs/assets/test-manual/image10.png)
+
+#### 示波器与通道配置
+
+##### 示波器：Tektronix MDO3024
+
+**表 2    Tektronix MDO3024 通道与传播延迟**
+
+| 通道 | 测量 | 探头 | 传播延迟 |
+| --- | --- | --- | --- |
+| CH1 | 主动管 Vgs | Tektronix TMDP0200 | 14.0ns |
+| CH2 | DUT Vds | Tektronix THDP0200 | 14.0ns |
+| CH3 | Id／电感电流 | CWT罗氏线圈 | 12.5ns |
+| CH4 | 被动管 Vgs | Cybertek OP6030 | 16.0ns |
+
+本批 DPT 数据在示波器内已启用推荐相差校正， 因此软件附加deskew 必须为 0 ns。只有未做示波器补偿的数据才允许填写软件 deskew；每次更换探头、线缆、量程或带宽限制后均应重新校准。
+
+#### 当前控制软件实际参数
+
+**表 3    当前上位机、协议和下位机实际接受的参数**
+
+| 模式 | 当前源码参数 |
+| --- | --- |
+| DPT 250 V/15 A | 第一脉冲 13.50 μs，间隔 20.0 μs，第二脉冲 2.0 μs |
+| DPT 500 V/15 A | 第一脉冲 6.75 μs，间隔  20.0 μs，第二脉冲 2.0 μs |
+| SPT | 默认 500 V 、15.0 μs |
+| Buck 1 min | 500 V 、30 kHz、固定 10%、 60000 ms |
+| Buck 20 ms | 500 V 、30 kHz、固定 10%、<br>20 ms |
+
+#### 测试项目与现有数据覆盖
+
+**表 4    总体测试矩阵、必要信号与现有覆盖**
+
+| 模块 | 当前实际工况 | 必须采集与输出 |
+| --- | --- | --- |
+| 静态 | 无主功率高压； 30 kHz； Q1 约 10% 、Q2 互补； 目标覆盖 1 min | Q1/Q2 Vgs 、驱动供电、<br>FAULT/复位；高低电平、频率、占空比、毛刺和完整覆盖 |
+| DPT | 250/500 V；15 A 与 45 A；每档至少 5 次 | 主动 Vgs 、Vds 、Id、被动 Vgs； Eon/Eoff、过冲、串扰、斜率、重复性 |
+| SPT | 低母线电压起始；逐步增加脉宽 | 主动 Vgs 、Vds 、Id 、FAULT；保护响应、关断应力和二次触发 |
+| Buck | 500 V 、30 kHz、固定  10%；45 Ω 额定 1 min；<br>15 Ω 三倍过载 20 ms | Q1/Q2 Vgs 、Vds、电流、 Vout、FAULT |
+
+#### 75°工况
+
+使用加热片将散热器加热至75°，保持2min后，使用热成像观察散热器，MOS管温度状态，合格后开始测试，在此工况下将下文测试重复一遍。
+
+![使用加热片将散热器加热至75°，保持2min后，使用热成像观察散热器，MOS管温度状态，合格后开始测试，在此工况下将下文测试重复一遍。](docs/assets/test-manual/image11.jpeg)
+
+*图 2 75°控温控制盒示意*
+
+![image12](docs/assets/test-manual/image12.jpeg)
+
+### 静态工况测试
+
+#### 测试目的、条件与判据
+
+静态测试在不加主功率高压的条件下验证两路栅极驱动幅值、互补关系、波形质量和连续运行稳定性。当前台架设置为 30 kHz 、Q1 约 10% 、Q2 互补， 目标记录时长为 1 min，所有栅极电压以 Kelvin Source 为参考。评价内容为：
+
+1.  两路高电平均为 +18.0 ± 1.0 V；
+
+2.  两路低电平均为 -5.0 ± 1.0 V；
+
+3.  无异常振荡、多次触发、毛刺、复位、误保护和故障锁存；
+
+4.  示波器记录或日志覆盖完整 1 min。
+
+5.ch1接于Q1Vgs，ch2接于Q1Vds，ch3罗氏线圈接于MOS管Ids，ch4接于Q2Vgs，测试接线与上位机界面如图
+
+*图 3上位机界面*
+
+![image13](docs/assets/test-manual/image13.png)
+
+#### 波形样例
+
+![波形样例](docs/assets/test-manual/image14.jpeg)
+
+*图 5静态工况测试样例*
+
+![图 5静态工况测试样例](docs/assets/test-manual/image15.png)
+
+### 双脉冲开关状态测试
+
+#### 工况矩阵与测试要求
+
+**表 5    当前 DPT 测试工况矩阵**
+
+| 工况 | 母线电压/V | 电流倍数 | 目标电流 |
+| --- | --- | --- | --- |
+| DPT-250-15 | 250 | 1.0 IN | 15 |
+| DPT-250-45 | 250 | 3.0 IN | 45 |
+| DPT-500-15 | 500 | 1.0 IN | 15 |
+| DPT-500-45 | 500 | 3.0 IN | 45 |
+
+ch1接于Q1Vgs，ch2接于Q1Vds，ch3罗氏线圈接于MOS管Ids，ch4接于Q2Vgs，接法与上文一致。每个工况进行五组测试，保存示波器截图和波形，在软件中对Eon，Eoff进行计算并对其他值进行评估。
+
+![ch1接于Q1Vgs，ch2接于Q1Vds，ch3罗氏线圈接于MOS管Ids，ch4接于Q2Vgs，接法与上文一致。每个工况进行五组测试，保存示波器截图和波形，在软件中对Eon，Eoff进行计算并对其他值进行评估。](docs/assets/test-manual/image16.png)
+
+*图 6上位机界面*
+
+每次同步采集主动管 Vgs 、DUT Vds 、Id  和被动管 Vgs。结果报告原始事件电流，并按当前波形评估工作台的目标电流 ±5% 工程标记评价。软件输出 Eon 、Eoff、Etotal、事件电流、积分窗口、 Vds 过冲、dv/dt 、di/dt、主动管栅极幅值、被动管串扰。
+
+#### 数据处理方法
+
+Tektronix ISF 数据按下式恢复时间和工程量：
+
+Vds 与 Id 使用开关沿相邻稳定区的局部 Top/Base。以局部幅度的 10% 电平定义积分边界：Eoff 从 Vds 上升穿过 10% 开始，到 Id 下降穿过 10% 结束；Eon 从 Id 上升穿过 10%开始，到 Vds 下降穿过 10% 结束。边沿识别采用±5% 滞回、8.4 ns 平滑和 200 ns 去抖，平滑仅用于找边沿。
+
+瞬时功率和有符号梯形积分为：
+
+![image17](docs/assets/test-manual/image17.png)
+
+![image18](docs/assets/test-manual/image18.png)
+
+计算不对功率取绝对值，也不把负功率强制截零。为比较 15 A 重复性，分别使用 Eon与 Eoff 事件电流归一化：
+
+![image19](docs/assets/test-manual/image19.png)
+
+归一化只用于组间比较，不能把原始电流不合规的记录改判为合规。
+
+#### 250 V/15 A 代表样例
+
+*图 7示波器波形样例*
+
+![图 8软件处理样例](docs/assets/test-manual/image20.jpeg)
+
+*图 8软件处理样例*
+
+![图 9积分窗口示例](docs/assets/test-manual/image21.jpeg)
+
+*图 9积分窗口示例*
+
+![image22](docs/assets/test-manual/image22.jpeg)
+
+#### 250 V/15 A 七组完整数据
+
+**表 7    250 V/15 A 七次测量及归一化结果**
+
+| 记录 | IEon/A | Eon/μJ | 归一化 | IEoff/A | Eoff/μJ | 归一化 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 15.058 | 11.650 | 11.605 | 15.449 | 42.682 | 41.442 |
+| 2 | 14.930 | 11.063 | 11.115 | 15.532 | 44.487 | 42.963 |
+| 3 | 14.841 | 11.239 | 11.359 | 15.333 | 41.127 | 40.233 |
+| 4 | 15.082 | 10.679 | 10.621 | 15.575 | 43.785 | 42.169 |
+| 5 | 14.958 | 10.492 | 10.522 | 15.423 | 42.358 | 41.196 |
+| 6 | 14.887 | 9.921 | 9.997 | 15.448 | 45.784 | 44.455 |
+| 7 | 14.739 | 10.601 | 10.789 | 15.310 | 44.016 | 43.125 |
+
+**表 8    250 V/15 A 重复性统计**
+
+| 指标 | 均值/μJ | 样本标准差/μJ | CV | 最小值/μJ | 最大值/μJ | 极差/均值 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Eon 原始 | 10.806 | 0.564 | 5.22% | 9.921 | 11.650 | 16.00% |
+| 归一化 | 10.858 | 0.547 | 5.03% | 9.997 | 11.605 | 14.82% |
+| Eoff 原始 | 43.463 | 1.535 | 3.53% | 41.127 | 45.784 | 10.72% |
+| 归一化 | 42.226 | 1.413 | 3.35% | 40.233 | 44.455 | 10.00% |
+
+#### 500 V/15 A 七组完整数据
+
+*图 10 500V15A样例*
+
+![image23](docs/assets/test-manual/image23.png)
+
+**表 9 500 V/15 A 七次测量及归一化结果**
+
+| 记录 | IEon/A | Eon/μJ | 归一化 | IEoff/A | Eoff/μJ | 归一化 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 15.492 | 18.098 | 17.524 | 15.835 | 86.521 | 81.958 |
+| 2 | 15.370 | 17.376 | 16.958 | 15.867 | 87.971 | 83.166 |
+| 3 | 15.726 | 17.064 | 16.276 | 16.112 | 88.894 | 82.760 |
+| 4 | 15.825 | 18.855 | 17.872 | 16.229 | 86.957 | 80.371 |
+| 5 | 15.760 | 17.749 | 16.893 | 16.006 | 85.886 | 80.489 |
+| 6 | 15.121 | 16.194 | 16.065 | 15.478 | 83.148 | 80.578 |
+| 7 | 15.191 | 16.863 | 16.651 | 15.593 | 82.416 | 79.284 |
+
+**表 10    500 V/15 A 重复性统计**
+
+| 指标 | 均值/μJ | 样本标准差/μJ | CV | 最小值/μJ | 最大值/μJ | 极差/均值 |
+| --- | --- | --- | --- | --- | --- | --- |
+| Eon 原始 | 17.457 | 0.872 | 4.99% | 16.194 | 18.855 | 15.24% |
+| Eon@15A | 16.891 | 0.644 | 3.81% | 16.065 | 17.872 | 10.70% |
+| Eoff 原始 | 85.971 | 2.396 | 2.79% | 82.416 | 88.894 | 7.53% |
+| Eoff@15A | 81.229 | 1.421 | 1.75% | 79.284 | 83.166 | 4.78% |
+
+#### 250V45 A 三倍电流工况数据状态
+
+*图 11 250V45A示波器样例*
+
+![图 12波形处理样例](docs/assets/test-manual/image24.png)
+
+*图 12波形处理样例*
+
+![image25](docs/assets/test-manual/image25.png)
+
+*图 13波形重构样例*
+
+![image26](docs/assets/test-manual/image26.png)
+
+#### 500V45 A 三倍电流工况数据状态
+
+*图 14 500V45A示波器样例*
+
+![图 15开关能量评估](docs/assets/test-manual/image27.png)
+
+*图 15开关能量评估*
+
+![图 16波形重构](docs/assets/test-manual/image28.png)
+
+*图 16波形重构*
+
+![image29](docs/assets/test-manual/image29.png)
+
+**表 11   DPT 三倍电流工况覆盖状态**
+
+### 单脉冲短路与过流保护测试
+
+#### 测试方法与必要信号
+
+在测试治具上将负载和电感短接，在低母线电压下开始。每次同步记录主动管 Vgs、 Vds 、Id 和FAULT/保护输出。保护响应时间必须从明确的电流越阈时刻计算至 FAULT有效沿。Mos管短路耐受时间2us，程序逻辑为从0.1us开始每隔0.2us为一个区间一直到3us，各队手动发送脉冲一直到触发保护。保留波形在软件中进行处理。
+
+注意不要使用单脉冲spt模式。
+
+![image30](docs/assets/test-manual/image30.png)
+
+![image31](docs/assets/test-manual/image31.png)
+
+上位机操作：先手动确认三个量，解锁脉冲，选择脉宽，触发，保护需在2us内触发。
+
+![image32](docs/assets/test-manual/image32.png)
+
+![image33](docs/assets/test-manual/image33.png)
+
+### 双向 Buck 工况测试
+
+其他接线不变，功率板输出由治具上引出，接致电子负载，将罗氏线圈从mos管Ids引脚修改到电感输入引脚，ch1，ch2，ch3保持原先Q1 Vgs，Q1 Vds，Q2 Vgs，在500V，45欧与15欧（三倍负载）工况下进行测试。测试过程中使用电子负载改变负载。
+
+![图 19电子负载接线](docs/assets/test-manual/image34.jpeg)
+
+*图 19电子负载接线*
+
+![图 20上位机界面](docs/assets/test-manual/image35.jpeg)
+
+*图 20上位机界面*
+
+![image36](docs/assets/test-manual/image36.png)
+![image37](docs/assets/test-manual/image37.png)
+
+#### 当前实际配置与数据条件
+
+**表 13    Buck 当前实际配置**
+
+| 指标 | 参数 |
+| --- | --- |
+| 母线电压 | 500 V |
+| 开关频率 | 固定 30 kHz |
+| 占空比 | Q1 固定 10%，Q2 互补 |
+| 额定负载/时长 | 45 Ω / 60000 ms |
+| 三倍过载/时长 | 15 Ω / 20 ms |
+| 电流上限 | 100 A |
+| 必要信号 | Q1/Q2 Vgs、Vds、电流、Vout、FAULT、负载标记 |
+
+在输出电压近似不变时， 45 Ω 切换至 15 Ω 的理论电流倍数为
+
+![image38](docs/assets/test-manual/image38.png)
+
+正式结果应以负载切换标记前后的实测 RMS电流计算：
+
+![image39](docs/assets/test-manual/image39.png)
+
+#### 500 V 功能样例
+
+*图 21 500 V Buck 波形*
+
+![image40](docs/assets/test-manual/image40.png)
+
+**表 14    tek0029 40 ms Buck 样例全部结果**
+
+| 指标 | 结果 |
+| --- | --- |
+| 记录时长/有效周期 | 40.000 ms/1208 |
+| 频率/周期 | 30.240 kHz/33.069 μs |
+| Q1 导通时间/占空比 | 3.329 μs/10.068% |
+| Q2 导通时间 | 27.790 μs |
+| 两方向死区/重叠 | 0.984/0.965 μs；0 次重叠 |
+| Q1 Vgs 高/低中位数 | 17.50/−4.50 V |
+| Q2 Vgs 高/低中位数 | 17.60/−7.20 V |
+| 周期/Q1/Q2 脉宽 CV | 0.015%/0.052%/0.016% |
+| 短毛刺段 | 4 个 |
+| Vds 关断/峰值/谷值 | 500/580/−60 V |
+| 电流均值/RMS | 0.623/2.653 A |
+| Vout/过载/FAULT | 暂无 |
+
+*图 22buck软件波形分析*
+
+![图 22buck软件波形分析](docs/assets/test-manual/image41.png)
+
+![image42](docs/assets/test-manual/image42.jpeg)
+
+**表 15 2 s Buck界面关键结果**
+
+| 指标 | 参数 |
+| --- | --- |
+| 有效周期/频率 | 30671/30.296 kHz |
+| Q1/Q2 导通时间 | 3.488/27.876 μs |
+| 两方向死区 | 0.893/0.902 μs |
+| Vds 峰值/谷值 | 750/−410 V |
+| 静态覆盖/过载 | 2.000 s |
