@@ -28,6 +28,7 @@
 4.评估软件仓库地址：[XIsStillLearing/double-pulse-switching-energy](https://github.com/XIsStillLearing/double-pulse-switching-energy)：Tektronix ISF 双脉冲波形重构与 Eon/Eoff 分析。
 
 5.程序烧录：使用arm烧录器连接控制板，接线如下图
+-[keil芯片pack文件](https://github.com/XIsStillLearing/sungrowpower_competition/releases/tag/JTAG%E7%83%A7%E5%BD%95-v1.0)
 
 ![测试手册插图 1](docs/assets/test-manual/image1.jpeg)
 ![测试手册插图 2](docs/assets/test-manual/image2.png)
