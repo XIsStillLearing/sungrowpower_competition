@@ -25,12 +25,20 @@
 
 - 每条数据必须保存实际探头型号、传播延迟、示波器 deskew、带宽限制和通道映射。已经在示波器内补偿的数据，软件 deskew 保持 0 ns。
 
-- 程序烧录：
-- 使用arm烧录器连接控制板，接线如下图
+  ## 程序烧录
+  
+  ### 使用arm仿真器jtag sw模式烧录
+  
+  使用arm烧录器连接控制板，接线如下图
+  
 - [keil芯片pack文件](https://github.com/XIsStillLearing/sungrowpower_competition/releases/tag/JTAG%E7%83%A7%E5%BD%95-v1.0)
+  
 - [源码地址](https://github.com/XIsStillLearing/sungrowpower_competition/releases#release-%E4%B8%8B%E4%BD%8D%E6%9C%BA-v1.2.5)
+  
 ![测试手册插图 1](docs/assets/test-manual/image1.jpeg)
+
 ![测试手册插图 2](docs/assets/test-manual/image2.png)
+
 
 - 烧码器连接：
 
@@ -67,7 +75,26 @@ MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接
 (3)如果此时已连接JLINK,可以进右侧Setting,进入如果正确识别出JLINK ID号,则调试器识别成功,就可以按照KEIL正常烧码和仿真流程操作了,如下图:
 
 ![测试手册插图 4](docs/assets/test-manual/image4.png)
--使用串口烧录
+### 使用串口烧录
+
+<img width="625" height="240" alt="image" src="https://github.com/user-attachments/assets/ddab8cbd-ac69-4fd5-a1a0-1bbbdc6ddec5" />
+
+MiniBoard跳线示意：J1连接3.3 V与VDDIO；J3连接TXD-GP28、RXD-GP29
+
+- 烧录步骤
+1.	安装J1和J3跳线帽，并再次核对连接位置。
+
+2.	使用USB数据线将MiniBoard的JP1 Type-C接口连接至PC。
+
+3.	解压并启动 NSSine Prog V1.26 [烧录程序](https://github.com/XIsStillLearing/sungrowpower_competition/releases#release-%E7%83%A7%E5%BD%95%E7%A8%8B%E5%BA%8F-v1.26)；必要时先安装配套驱动。
+
+4.	选择芯片 NS800RT1157，并按发布说明选择对应通信/复位方式。
+
+5.	加载主办方发布的 Double Pulse Test.hex [下位机](https://github.com/XIsStillLearing/sungrowpower_competition/releases#release-%E4%B8%8B%E4%BD%8D%E6%9C%BA-%E4%B8%B2%E5%8F%A3-v1.2.5-beta)文件。
+
+6.	执行擦除、下载和校验；仅在软件明确显示成功后进入下一步。
+
+7.	断开并重新上电，确认控制板无故障，再启动上位机读取设备信息。
 
 - 通信设置：比赛中使用治具底部连接测试版，各组可自行飞线于can盒连接至电脑进行通信。
 
@@ -78,7 +105,10 @@ MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接
 ![测试手册插图 6](docs/assets/test-manual/image6.jpeg)
 
 -上位机使用：
-
+- [使用串口的上位机](https://github.com/XIsStillLearing/sungrowpower_competition/releases/tag/%E4%B8%8A%E4%BD%8D%E6%9C%BA-%E4%B8%B2%E5%8F%A3-v1.2.5-beta)
+  
+- [使用can的上位机](https://github.com/XIsStillLearing/sungrowpower_competition/releases/tag/%E4%B8%8A%E4%BD%8D%E6%9C%BA-v1.2.5)
+  
 1.确保接线正常之后打开上位机，界面如图：
 
 ![测试手册插图 7](docs/assets/test-manual/image7.png)
@@ -95,23 +125,12 @@ MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接
 
 ### 示波器与通道配置
 
-| 通道 | 测量 | 探头 | 传播延迟 |
-| --- | --- | --- | --- |
+| 通道 | 测量 |
+| --- | --- | 
 | CH1 | 主动管 Vgs |
 | CH2 | DUT Vds |
 | CH3 | Id／电感电流 |
 | CH4 | 被动管 Vgs | 
-
-
-
-### 75°工况
-
-使用加热片将散热器加热至75°，保持2min后，使用热成像观察散热器，MOS管温度状态，合格后开始测试，在此工况下将下文测试重复一遍。
-![使用加热片将散热器加热至75°，保持2min后，使用热成像观察散热器，MOS管温度状态，合格后开始测试，在此工况下将下文测试重复一遍。](docs/assets/test-manual/image11.jpeg)
-
-- 图 2 75°控温控制盒示意
-
-![测试手册插图 12](docs/assets/test-manual/image12.jpeg)
 
 ## 静态工况测试
 
@@ -131,6 +150,8 @@ MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接
 
 - 图 3上位机界面
 
+<img width="1041" height="645" alt="image" src="https://github.com/user-attachments/assets/195c378d-215b-4087-95b4-eddbff51a712" />
+
 ![测试手册插图 13](docs/assets/test-manual/image13.png)
 
 ### 波形样例
@@ -142,8 +163,6 @@ MiniBoard板上丝印显示都有VDDIO,VSS,SWDIO, SWCLK,对着丝印名称连接
 ## 双脉冲开关状态测试
 
 ### 工况与测试要求
-
-
 
 | 工况 | 母线电压/V | 电流倍数 | 目标电流 |
 | --- | --- | --- | --- |
@@ -167,11 +186,9 @@ ch1接于Q1Vgs，ch2接于Q1Vds，ch3罗氏线圈接于MOS管Ids，ch4接于Q2Vg
 
 注意不要使用单脉冲spt模式。
 
-![测试手册插图 30](docs/assets/test-manual/image30.png)
+<img width="1041" height="645" alt="image" src="https://github.com/user-attachments/assets/e7c4c4cd-f432-40be-9c83-21c5c741e544" />
 
-![测试手册插图 31](docs/assets/test-manual/image31.png)
-
-上位机操作：先手动确认三个量，解锁脉冲，选择脉宽，触发，保护需在2us内触发。
+上位机操作：先手动确认三个量，解锁脉冲，选择脉宽，触发，保护需在2us内触发,mos管短路耐受时间仅2us。
 
 ![测试手册插图 32](docs/assets/test-manual/image32.png)
 
